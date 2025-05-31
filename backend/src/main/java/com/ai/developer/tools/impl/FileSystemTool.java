@@ -53,6 +53,18 @@ public class FileSystemTool implements Tool {
         String operation = (String) arguments.get("operation");
         String path = (String) arguments.get("path");
         
+        // Fix for NullPointerException: Add null check for operation
+        if (operation == null) {
+            log.error("Operation cannot be null");
+            return Flux.error(new IllegalArgumentException("Operation parameter is required"));
+        }
+        
+        // Fix for NullPointerException: Add null check for path
+        if (path == null) {
+            log.error("Path cannot be null");
+            return Flux.error(new IllegalArgumentException("Path parameter is required"));
+        }
+        
         return switch (operation.toLowerCase()) {
             case "read" -> readFile(path);
             case "write" -> writeFile(path, (String) arguments.get("content"));

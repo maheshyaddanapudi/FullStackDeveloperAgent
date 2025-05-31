@@ -160,8 +160,14 @@ public class ChatService {
         log.info("Current context for session {} has {} messages", sessionId, context.getMessages().size());
         for (int i = 0; i < context.getMessages().size(); i++) {
             Message msg = context.getMessages().get(i);
+            // Fix for NullPointerException: Add null check for message content
+            String content = msg.getContent();
+            if (content == null) {
+                log.warn("Message {} has null content, role={}", i, msg.getRole());
+                content = "";
+            }
             log.info("Message {}: role={}, content={}", i, msg.getRole(), 
-                    msg.getContent().length() > 50 ? msg.getContent().substring(0, 50) + "..." : msg.getContent());
+                    content.length() > 50 ? content.substring(0, 50) + "..." : content);
         }
         
         // Add user message to context
@@ -257,7 +263,13 @@ public class ChatService {
                             .orElse(null);
                     
                     if (latestAssistantMessage != null) {
-                        latestAssistantMessage.setContent(latestAssistantMessage.getContent() + chunk);
+                        // Fix for NullPointerException: Add null check for message content
+                        String currentContent = latestAssistantMessage.getContent();
+                        if (currentContent == null) {
+                            currentContent = "";
+                            log.warn("Latest assistant message has null content, initializing to empty string");
+                        }
+                        latestAssistantMessage.setContent(currentContent + chunk);
                     }
                     
                     return Mono.just(ChatResponse.builder()
